@@ -2,38 +2,6 @@
 
 FastAPI + PostgreSQL + Alembic + Docker. Authors and books with cookie session auth on write endpoints.
 
-## Architecture
-
-![Bookstore API architecture](architecture.png)
-
-```mermaid
-flowchart LR
-    subgraph Client
-        Swagger["Swagger UI /docs"]
-        HTTP["HTTP client"]
-    end
-
-    subgraph Compose["docker-compose"]
-        subgraph API["api container"]
-            Start["entrypoint.py\nwait for DB → alembic upgrade head"]
-            Uvicorn["Uvicorn"]
-            FastAPI["FastAPI\nGET public\nPOST/PUT/DELETE need session"]
-            ORM["SQLAlchemy"]
-            Start --> Uvicorn --> FastAPI --> ORM
-        end
-
-        subgraph DB["db container"]
-            PG["PostgreSQL 16"]
-            Tables["users | authors | books"]
-            PG --> Tables
-        end
-    end
-
-    Swagger -->|"JSON + session cookie"| FastAPI
-    HTTP --> FastAPI
-    ORM -->|"DATABASE_URL"| PG
-    Start -->|"migrations"| PG
-```
 
 **Request flow:** browser hits `/docs` → FastAPI → SQLAlchemy → Postgres. On container start, `entrypoint.py` waits until Postgres accepts connections, runs `alembic upgrade head`, then starts Uvicorn. Tables are never created with `Base.metadata.create_all()`.
 

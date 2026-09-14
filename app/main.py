@@ -43,7 +43,6 @@ app = FastAPI(
     ),
 )
 
-# Cookie-based sessions. On Render the site is HTTPS, so the cookie must be Secure.
 app.add_middleware(
     SessionMiddleware,
     secret_key=os.getenv("SECRET_KEY", "dev-secret-change-me"),
@@ -57,9 +56,6 @@ app.add_middleware(
 @app.get("/health", tags=["health"])
 def health():
     return {"status": "ok"}
-
-
-# ── Auth ────────────────────────────────────────────────────────────────────
 
 
 @app.post("/register", response_model=UserOut, status_code=status.HTTP_201_CREATED, tags=["auth"])
@@ -93,8 +89,6 @@ def logout(request: Request):
 def me(current_user: User = Depends(get_current_user)):
     return current_user
 
-
-# ── Authors ─────────────────────────────────────────────────────────────────
 
 
 @app.get("/authors", response_model=list[AuthorOut], tags=["authors"])
@@ -174,8 +168,6 @@ def delete_author(
     db.commit()
     return {"message": "Author deleted"}
 
-
-# ── Books ───────────────────────────────────────────────────────────────────
 
 
 @app.get("/books", response_model=list[BookOut], tags=["books"])

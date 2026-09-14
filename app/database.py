@@ -18,7 +18,6 @@ def get_database_url() -> str:
     url = os.getenv("DATABASE_URL")
     if not url:
         raise RuntimeError("DATABASE_URL is not set. Copy .env.example to .env.")
-    # Render (and Heroku) sometimes use postgres:// which SQLAlchemy rejects.
     if url.startswith("postgres://"):
         url = "postgresql://" + url[len("postgres://") :]
     return url
@@ -26,7 +25,6 @@ def get_database_url() -> str:
 
 def _engine_kwargs(url: str) -> dict:
     kwargs = {"pool_pre_ping": True}
-    # External Render URLs need TLS. Internal ones (fromDatabase) do not.
     if "render.com" in url and "render-internal.com" not in url and "sslmode=" not in url:
         kwargs["connect_args"] = {"sslmode": "require"}
     return kwargs
@@ -36,7 +34,6 @@ DATABASE_URL = get_database_url()
 engine = create_engine(DATABASE_URL, **_engine_kwargs(DATABASE_URL))
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# Models inherit from this. Alembic also uses Base.metadata.
 Base = declarative_base()
 
 
